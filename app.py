@@ -79,4 +79,35 @@ if lat is not None and lon is not None:
             df['hujan'] = df['rain'].apply(lambda x: x.get('3h', 0) if isinstance(x, dict) else 0)
 
             # Pilih tanggal
-            tanggal_uni_
+            tanggal_unik = df['waktu'].dt.date.unique()
+            tanggal_pilih = st.selectbox("Pilih tanggal", tanggal_unik)
+            df_tanggal = df[df['waktu'].dt.date == tanggal_pilih]
+
+            # Tampilkan data tabel
+            st.dataframe(df_tanggal[['waktu', 'suhu', 'hujan']].set_index('waktu'))
+
+            # --- Grafik Suhu ---
+            st.subheader("🌡️ Grafik Suhu")
+            fig1, ax1 = plt.subplots()
+            ax1.plot(df_tanggal['waktu'], df_tanggal['suhu'], marker='o')
+            ax1.set_xlabel("Waktu")
+            ax1.set_ylabel("Suhu (°C)")
+            ax1.set_title(f"Suhu pada {tanggal_pilih}")
+            ax1.grid(True)
+            st.pyplot(fig1)
+
+            # --- Grafik Curah Hujan ---
+            st.subheader("🌧️ Grafik Curah Hujan")
+            fig2, ax2 = plt.subplots()
+            ax2.bar(df_tanggal['waktu'], df_tanggal['hujan'])
+            ax2.set_xlabel("Waktu")
+            ax2.set_ylabel("Curah Hujan (mm)")
+            ax2.set_title(f"Curah Hujan pada {tanggal_pilih}")
+            ax2.grid(True)
+            st.pyplot(fig2)
+
+        else:
+            st.error(forecast_data.get("message", "Gagal mengambil data prakiraan"))
+
+    except Exception as e:
+        st.error(f"Error saat ambil data prakiraan: {e}")
